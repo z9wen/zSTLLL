@@ -1,30 +1,62 @@
 #include <iostream>
-#include <memory>
-#include <vector>
+#include <string>
+#include <sstream>
+#include <ctime>
+#include <iomanip>
 
-
-class A{
-    public:
-        A(int a):a(a){}
-        int a;
+enum LogLevel {
+    DEBUG,
+    INFO,
+    WARN,
+    ERROR
 };
 
-int main(){
+class Logger {
+public:
+    Logger(LogLevel level) : logLevel(level) {}
 
-    std::vector<std::shared_ptr<A>> vec;
-    vec.push_back(std::make_shared<A>(1));
-    vec.push_back(std::make_shared<A>(2));
-    vec.push_back(std::make_shared<A>(3));
-    vec.push_back(std::make_shared<A>(4));
-    vec.push_back(std::make_shared<A>(5));
-
-    for(auto &v: vec){
-        std::cout << v->a << std::endl;
+    void debug(const std::string& message) {
+        if (logLevel <= DEBUG) log("DEBUG", message);
     }
 
-    A a(10);
-    std::shared_ptr<A> ptr = std::make_shared<A>(a);
-    std::cout << ptr->a << std::endl;
+    void info(const std::string& message) {
+        if (logLevel <= INFO) log("INFO", message);
+    }
+
+    void warn(const std::string& message) {
+        if (logLevel <= WARN) log("WARN", message);
+    }
+
+    void error(const std::string& message) {
+        if (logLevel <= ERROR) log("ERROR", message);
+    }
+
+private:
+    LogLevel logLevel;
+
+    void log(const std::string& level, const std::string& message) {
+        // 获取当前时间
+        auto t = std::time(nullptr);
+        auto tm = *std::localtime(&t);
+
+        std::ostringstream oss;
+        oss << std::put_time(&tm, "%Y-%m-%d %H:%M:%S");
+        std::string strTime = oss.str();
+
+        // 输出日志
+        std::cout << "[" << strTime << "] " << level << ": " << message << std::endl;
+    }
+};
+
+
+// 使用示例
+int main() {
+    Logger logger(DEBUG); // 设置日志级别
+
+    logger.debug("This is a debug message.");
+    logger.info("This is an info message.");
+    logger.warn("This is a warning message.");
+    logger.error("This is an error message.");
 
     return 0;
 }
